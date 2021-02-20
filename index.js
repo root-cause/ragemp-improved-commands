@@ -1,7 +1,7 @@
 const CommandEvents = require("./CommandEvents");
 const CommandRegistry = require("./CommandRegistry");
 
-mp.events.add("playerCommand", (player, message) => {
+mp.events.add("playerCommand", async (player, message) => {
     const args = message.trim().split(/ +/);
     const name = args.shift();
     const fullText = args.join(" ");
@@ -25,10 +25,22 @@ mp.events.add("playerCommand", (player, message) => {
     }
 
     try {
-        if (typeof command.beforeRun !== "function") {
-            command.run(player, fullText, ...args);
-        } else {
-            if (command.beforeRun(player, fullText, ...args)) {
+        let shouldRun = true;
+
+        // Handle beforeRun
+        if (typeof command.beforeRun === "function") {
+            if (command.beforeRun.constructor.name === "AsyncFunction") {
+                shouldRun = await command.beforeRun(player, fullText, ...args);
+            } else {
+                shouldRun = command.beforeRun(player, fullText, ...args);
+            }
+        }
+
+        // Handle run
+        if (shouldRun === true /* explicitly checking for true in case of beforeRun returning non-boolean */) {
+            if (command.run.constructor.name === "AsyncFunction") {
+                await command.run(player, fullText, ...args);
+            } else {
                 command.run(player, fullText, ...args);
             }
         }

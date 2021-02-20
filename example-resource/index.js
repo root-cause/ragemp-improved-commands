@@ -109,3 +109,36 @@ CommandRegistry.add({
         player.outputChatBox(`Commands: ${commands.join(", ")}`);
     }
 });
+
+function sleep(ms) {
+    return new Promise(resolve => setTimeout(resolve, ms));
+}
+
+// Example: Async beforeRun
+// Important: You should check if player object is still valid by mp.players.exists(player) after awaiting
+CommandRegistry.add({
+    name: "async",
+    beforeRun: async function (player) {
+        // Getting data from slow API
+        await sleep(5000);
+
+        const result = Math.random() < 0.5;
+        if (result) {
+            player.outputChatBox("You're allowed...");
+        } else {
+            player.outputChatBox("You're not allowed...");
+        }
+
+        return result;
+    },
+    run: async function (player) {
+        // Getting data from slow API again
+        await sleep(2000);
+
+        if (Math.random() < 0.5) {
+            player.outputChatBox("You waited for nothing!");
+        } else {
+            throw new Error("Failed so bad it caused an error"); // should emit fail
+        }
+    }
+});
