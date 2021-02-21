@@ -2,9 +2,11 @@ const CommandEvents = require("./CommandEvents");
 const CommandRegistry = require("./CommandRegistry");
 
 mp.events.add("playerCommand", async (player, message) => {
-    const args = message.trim().split(/ +/);
+    message = message.trim();
+
+    const args = message.split(/ +/);
     const name = args.shift();
-    const fullText = args.join(" ");
+    const fullText = message.substring(name.length + 1); // +1 for the space after command name
 
     // Check if command exists
     const command = CommandRegistry.find(name);
